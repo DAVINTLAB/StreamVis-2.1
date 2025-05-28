@@ -2,6 +2,7 @@ import json
 from output.charts.toxic_types_chart import create_toxic_types_chart
 from output.counts.toxic_type_counts import count_toxic_types
 from output.filter.toxic_types_filter import toxic_types_filter
+from output.wordclouds.wordcloud import gerar_nuvem_palavras
 import streamlit as st
 
 def toxic_types_page(path: str = 'input/oscar_comments.json'):
@@ -41,4 +42,14 @@ def toxic_types_page(path: str = 'input/oscar_comments.json'):
 
     with st.expander(f'{toxic_type} Wordclouds', expanded=True):
         st.write(f'Wordclouds for {toxic_type} will be displayed here.')
+        toxic_data = toxic_types_filter(data, toxic_type)
+        if(toxic_data.__len__() == 0):
+            st.warning(f'No data found for {toxic_type}.')
+            return
+        gerar_nuvem_palavras(toxic_data, toxic_type)
+        st.image(
+            f'output/wordclouds/images/nuvem_palavras{toxic_type}.png',
+            caption=f'Wordcloud for {toxic_type}',
+            use_container_width=True
+        )
         
