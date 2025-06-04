@@ -1,3 +1,4 @@
+from app_pages.scream_index.scream_index import scream_index_page
 from app_pages.toxic.toxic_types import toxic_types_page
 import streamlit as st
 
@@ -18,10 +19,7 @@ match secao:
         toxic_types_page()
 
     case 'Scream Index':
-        st.title('Scream Index')
-        st.write('This section is for Scream Index analysis.')
-        st.write('You can upload your data and analyze it here.')
-
+        scream_index_page()
     case 'Sentiment Analysis':
         st.title('Sentiment Analysis')
         st.write('This section is for Sentiment Analysis.')
