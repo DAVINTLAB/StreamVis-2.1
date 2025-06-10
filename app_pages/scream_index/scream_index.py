@@ -23,10 +23,28 @@ def scream_index_page(json_file_path:str = 'input/oscar_comments.json'):
             height=200
         )
         return fig
+    
+    def create_gauge_chart(title, value):
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=value,
+            title={"text": title, "font": {"size": 24}},
+            gauge={
+                'axis': {'range': [0, 1]},
+                'bar': {'color': "red"},
+                'steps': [
+                    {'range': [0, 0.7], 'color': "lightgray"},
+                    {'range': [0.7, 1], 'color': "red"}
+                ]
+            }
+        ))
+        return fig
 
     st.title('Scream Index Analysis')
-    st.plotly_chart(create_card("Mean scream index", scream_index_mean(json_file_path), card_color="red", text_color="white"),
-                    use_container_width=True)
+    st.plotly_chart(create_gauge_chart(
+        "Scream index mean",
+        scream_index_mean(json_file_path)
+    ), use_container_width=True)
     
     with st.expander("Messages above 0.7 scream index", expanded=True):
         with open(json_file_path, 'r', encoding='utf-8') as f:
