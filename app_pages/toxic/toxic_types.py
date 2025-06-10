@@ -1,8 +1,10 @@
 import json
 from output.charts.toxic_types_chart import create_toxic_types_chart
+from output.counts.all_toxic_type_count import get_all_toxic_type_count
 from output.counts.toxic_type_counts import count_toxic_types
 from output.filter.toxic_types_filter import toxic_types_filter
 from output.wordclouds.wordcloud import gerar_nuvem_palavras
+import plotly.graph_objects as go
 import streamlit as st
 
 def toxic_types_page(path: str = 'input/oscar_comments.json'):
@@ -12,7 +14,28 @@ def toxic_types_page(path: str = 'input/oscar_comments.json'):
     """
     data = json.load(open(path, 'r', encoding='utf-8'))
 
+    def create_gauge_chart(title, value):
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=value,
+            title={"text": title, "font": {"size": 24}},
+            gauge={
+                'axis': {'range': [0, 1]},
+                'bar': {'color': "red"},
+                'steps': [
+                    {'range': [0, 0.7], 'color': "lightgray"},
+                    {'range': [0.7, 1], 'color': "red"}
+                ]
+            }
+        ))
+        return fig
+
     st.title('Toxic Types Analysis')
+    st.plotly_chart(create_gauge_chart(
+        "Toxic Types Count",
+        get_all_toxic_type_count(path)
+    ), use_container_width=True)
+    
     with st.expander('Toxic Types in General', expanded=True):
         st.plotly_chart(
             create_toxic_types_chart(
@@ -53,3 +76,4 @@ def toxic_types_page(path: str = 'input/oscar_comments.json'):
             use_container_width=True
         )
         
+    

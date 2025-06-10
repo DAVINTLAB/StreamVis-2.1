@@ -28,7 +28,7 @@ def scream_index_page(json_file_path:str = 'input/oscar_comments.json'):
     st.plotly_chart(create_card("Mean scream index", scream_index_mean(json_file_path), card_color="red", text_color="white"),
                     use_container_width=True)
     
-    with st.expander("Messages above 70 screan index", expanded=True):
+    with st.expander("Messages above 0.7 scream index", expanded=True):
         with open(json_file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
         scream_indices = [obj for obj in data if obj.get('scream_index', 0) > 0.70]
