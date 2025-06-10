@@ -1,4 +1,3 @@
-# Given a JSON file with toxic indexes, i want to count the occurrences of each toxic type (above 0.7 index) and return a dictionary with the counts.
 import json
 from collections import defaultdict
 
