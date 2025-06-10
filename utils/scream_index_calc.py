@@ -6,7 +6,7 @@ def add_scream_index(json_file_path):
     with open(json_file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     for obj in data:
-        text = ''.join(str(v) for v in obj.values() if isinstance(v, str))
+        text = obj['message']
         letters = [c for c in text if unicodedata.category(c).startswith('L')]
         if letters:
             scream_index = sum(1 for c in letters if c.isupper()) / len(letters)
