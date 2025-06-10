@@ -36,4 +36,24 @@ def scream_index_page(json_file_path:str = 'input/oscar_comments.json'):
             data=scream_indices,
             use_container_width=True
         )
+
+    st.title('Top Commenters by Scream Index')
+    with open(json_file_path, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    commenters = {}
+    scream_indices = [obj for obj in data if obj.get('scream_index', 0) > 0.70]
+    for obj in scream_indices:
+        commenter = obj.get('author', 'Unknown')
+        if commenter not in commenters:
+            commenters[commenter] = []
+        commenters[commenter].append(obj)
+    sorted_commenters = sorted(commenters.items(), key=lambda x: len(x[1]), reverse=True)
+    top_commenters = sorted_commenters[:10]
+    st.write("Top 10 commenters by Scream Index:")
+    for commenter, comments in top_commenters:
+        st.write(f"{commenter}: {len(comments)} comments")
+        with st.expander(f"Comments by {commenter}", expanded=False):
+            for comment in comments:
+                st.write(f"- {comment.get('message', 'No content')} (Scream Index: {comment.get('scream_index', 0)})")
+    
     
