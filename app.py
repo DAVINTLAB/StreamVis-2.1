@@ -7,7 +7,6 @@ from v1.particoes import get_partitions
 from v1.peaks import get_peaks, get_top_words, get_word_context
 import plotly.graph_objects as go
 from v2.app_pages.scream_index.scream_index import scream_index_page
-from v2.app_pages.sentiment.sentiment_analysis import sentiment_analysis_page
 from v2.app_pages.toxic.toxic_types import toxic_types_page
 
 st.set_page_config(
