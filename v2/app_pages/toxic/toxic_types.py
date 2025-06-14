@@ -71,7 +71,7 @@ def toxic_types_page(path: str = 'v2/input/oscar_comments.json'):
             return
         gerar_nuvem_palavras(toxic_data, toxic_type)
         st.image(
-            f'output/wordclouds/images/nuvem_palavras{toxic_type}.png',
+            f'v2/output/wordclouds/images/nuvem_palavras{toxic_type}.png',
             caption=f'Wordcloud for {toxic_type}',
             use_container_width=True
         )
