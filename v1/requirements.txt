@@ -1,0 +1,10 @@
+requests
+python-dateutil
+pytz
+python-dotenv
+wordcloud
+nltk
+pandas
+matplotlib
+streamlit
+plotly
