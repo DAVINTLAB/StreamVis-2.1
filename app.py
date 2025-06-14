@@ -148,7 +148,7 @@ def upload_json(json_file):
     st.session_state['comments_json'] = 'v1/input/comments.json'
     
 
-pagina = st.sidebar.selectbox('Page', ['Upload Json','Comments peak', 'Top comment authors', 'Partitions', 'Stats', 'New members', 'Toxic Speech', 'Scream Index', 'Sentiment Analysis'])
+pagina = st.sidebar.selectbox('Page', ['Upload Json','Comments peak', 'Top comment authors', 'Partitions', 'Stats', 'New members', 'Toxic Speech', 'Scream Index'])
 
 if pagina == 'Comments peak':
     comments_peak()
@@ -164,7 +164,5 @@ elif pagina == 'Toxic Speech':
     toxic_types_page()
 elif pagina == 'Scream Index':
     scream_index_page()
-elif pagina == 'Sentiment Analysis':
-    sentiment_analysis_page()
 else:
     landing_page()
