@@ -21,7 +21,7 @@ def load_and_process_data(path: str):
         st.error(f"Erro ao carregar o arquivo JSON em '{path}': {e}")
         return []
 
-def sentiment_analysis_page(path:str = 'v2/input/oscar_comments.json'):
+def sentiment_analysis_page(path:str = 'v1/input/comments.json'):
     """
     Returns page for sentiment types analysis.
     This function sets up the Streamlit page configuration and sidebar selection for sentiment types analysis.

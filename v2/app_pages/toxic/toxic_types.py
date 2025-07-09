@@ -7,7 +7,7 @@ from v2.output.wordclouds.wordcloud import gerar_nuvem_palavras
 import plotly.graph_objects as go
 import streamlit as st
 
-def toxic_types_page(path: str = 'v2/input/oscar_comments.json'):
+def toxic_types_page(path: str = 'v1/input/comments.json'):
     """
     Returns page for toxic types analysis.
     This function sets up the Streamlit page configuration and sidebar selection for toxic types analysis.
@@ -71,7 +71,7 @@ def toxic_types_page(path: str = 'v2/input/oscar_comments.json'):
             return
         gerar_nuvem_palavras(toxic_data, toxic_type)
         st.image(
-            f'v2/output/wordclouds/images/nuvem_palavras{toxic_type}.png',
+            f'output/wordclouds/images/nuvem_palavras{toxic_type}.png',
             caption=f'Wordcloud for {toxic_type}',
             use_container_width=True
         )
