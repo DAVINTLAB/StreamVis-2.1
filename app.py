@@ -17,12 +17,12 @@ st.set_page_config(
 )
 
 if st.session_state.get('comments_json') is None:
-    st.session_state['comments_json'] = 'v1/comments.json'
+    st.session_state['comments_json'] = 'input/comments.json'
 
 if st.session_state.get('partitions') is None:
     st.session_state['partitions'] = get_partitions(st.session_state['comments_json'])
 
-UPLOAD_DIR = 'v1/input'
+UPLOAD_DIR = 'input'
 
 if not os.path.exists(UPLOAD_DIR):
     os.makedirs(UPLOAD_DIR)
@@ -142,10 +142,10 @@ def show_new_members():
 def upload_json(json_file):
     if json_file is None:
         return
-    with open('v1/input/comments.json', 'wb') as f:
+    with open('input/comments.json', 'wb') as f:
         f.write(json_file.getbuffer())
     
-    st.session_state['comments_json'] = 'v1/input/comments.json'
+    st.session_state['comments_json'] = 'input/comments.json'
     
 
 pagina = st.sidebar.selectbox('Page', ['Upload Json','Comments peak', 'Top comment authors', 'Partitions', 'Stats', 'New members', 'Toxic Speech', 'Scream Index', 'Sentiment Analysis'])

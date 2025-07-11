@@ -16,9 +16,9 @@ def get_author_comments(author, comments_json, interval=30):
     author_filtered_comments = [comment for comment in author_comments if comment['message'].strip()]
 
     df = pd.DataFrame(author_filtered_comments)
-    df['timestamp'] = pd.to_datetime(df['time_elapsed'])
+    df['timestamp'] = pd.to_datetime(df['time_elapsed'], format='%H:%M:%S', errors='coerce')
     df.set_index('timestamp', inplace=True)
-    resampled_df = df.resample(f'{interval}T').size()
+    resampled_df = df.resample(f'{interval}min').size()
 
     plt.figure(figsize=(14, 6))
     plt.plot(resampled_df.index, resampled_df.values)

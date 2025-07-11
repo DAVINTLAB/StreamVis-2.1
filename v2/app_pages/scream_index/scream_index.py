@@ -3,7 +3,7 @@ from v2.output.counts.scream_index_counts import scream_index_mean
 import streamlit as st
 import plotly.graph_objects as go
 
-def scream_index_page(json_file_path:str = 'v1/input/comments.json'):
+def scream_index_page(json_file_path:str = 'input/comments.json'):
     """ Streamlit page to display the Scream Index.
     This function creates a Streamlit page that displays the mean Scream Index
     and a card with the Scream Index value.

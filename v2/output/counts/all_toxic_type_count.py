@@ -1,6 +1,6 @@
 import json
 
-def get_all_toxic_type_count(json_file_path: str = 'v1/input/comments.json'):
+def get_all_toxic_type_count(json_file_path: str = 'input/comments.json'):
     """
     Counts occurrences of each toxic type from a JSON file.
     
