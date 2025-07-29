@@ -55,13 +55,18 @@ def sentiment_analysis_page(path:str = 'input/comments.json'):
         # Filtra os comentários até o tempo selecionado
         filtered_data = [c for c in data if c['time_in_seconds'] <= selected_seconds]
 
+
         # Calcula a porcentagem de negatividade
         if not filtered_data:
             negativity_percentage = 0.0
         else:
             total_comments = len(filtered_data)
+            print(f"Total comments considered: {total_comments}")
+            print(f"Data 1: {filtered_data[0]}")
             negative_comments = sum(1 for c in filtered_data if c.get('sentiment') == 'NEG')
+            print(f"Negative comments: {negative_comments}")
             negativity_percentage = (negative_comments / total_comments) * 100 if total_comments > 0 else 0
+            print(f"Negativity percentage: {negativity_percentage:.2f}%")
 
         # Cria e exibe o gauge       
         st.plotly_chart(
