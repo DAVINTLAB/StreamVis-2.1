@@ -28,7 +28,7 @@ def gerar_nuvem_palavras(json_data, complemento=''):
     stop_words = set(stopwords.words('portuguese'))
     wordcloud = WordCloud(stopwords=stop_words, background_color='white', width=1920, height=1080).generate(text)
 
-    output_dir = 'output/wordclouds/images'
+    output_dir = 'v2/output/wordclouds/images'
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, f'nuvem_palavras{complemento}.png')
 
