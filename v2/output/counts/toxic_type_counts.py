@@ -23,7 +23,7 @@ def count_toxic_types(file_path):
         'sexual_explicit'
     ]
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
         for item in data:
             for toxic_type, index in item.items():
