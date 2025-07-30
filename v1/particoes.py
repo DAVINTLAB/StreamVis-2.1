@@ -6,7 +6,7 @@ def parse_time(time):
     return timedelta(hours=h, minutes=m, seconds=s)
 
 def get_partitions(comments_json, n=5):
-    with open(comments_json, 'r') as file:
+    with open(comments_json, encoding='utf-8') as file:
         comments = json.load(file)
     
     for comment in comments:

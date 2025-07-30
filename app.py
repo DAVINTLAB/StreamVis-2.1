@@ -142,7 +142,7 @@ def show_new_members():
 def upload_json(json_file):
     if json_file is None:
         return
-    with open('input/comments.json', 'wb') as f:
+    with open('input/comments.json', 'wb', encoding='utf-8') as f:
         f.write(json_file.getbuffer())
     
     st.session_state['comments_json'] = 'input/comments.json'

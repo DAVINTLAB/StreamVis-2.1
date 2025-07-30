@@ -19,7 +19,7 @@ def count_sentiment_types(file_path):
         'NEG'
     ]
 
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
         for item in data:
             sentiment = item['sentiment']
