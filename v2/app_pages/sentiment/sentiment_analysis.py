@@ -3,6 +3,7 @@ import streamlit as st
 from v2.output.charts.sentiment_types_chart import create_sentiment_types_chart
 from v2.output.counts.sentiment_type_counts import count_sentiment_types
 from v2.output.charts.negativity_gauge_meter import *
+from v2.output.peaks.sentiment_peaks import get_sentiments_peak
 
 @st.cache_data
 def load_and_process_data(path: str):
@@ -82,4 +83,25 @@ def sentiment_analysis_page(path:str = 'input/comments.json'):
             ),
             use_container_width=True
         )
-    
+
+
+    sentiment = st.selectbox(
+            label="Select the sentiment to analyze:",
+            options=["positive", "negative", "neutral"]
+        )
+    match sentiment:
+        case "positive":
+            peaks = get_sentiments_peak("POS", data)
+        case "negative":
+            peaks = get_sentiments_peak("NEG", data)
+        case "neutral":
+            peaks = get_sentiments_peak("NEU", data)
+
+    for peak in peaks:
+        with st.expander(f"Peak from {seconds_to_time_str(peak['start_time'])} to {seconds_to_time_str(peak['end_time'])}"):
+            st.write(f"{sentiment.capitalize()}: {peak['sentiment']/ peak['count']:.2f}%")
+            for comment in data:
+                if peak['start_time'] <= comment['time_in_seconds'] < peak['end_time']:
+                    st.write(f"- {comment['message']} (at {seconds_to_time_str(comment['time_in_seconds'])})")
+
+        
