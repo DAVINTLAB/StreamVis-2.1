@@ -9,6 +9,8 @@ import plotly.graph_objects as go
 from v2.app_pages.scream_index.scream_index import scream_index_page
 from v2.app_pages.sentiment.sentiment_analysis import sentiment_analysis_page
 from v2.app_pages.toxic.toxic_types import toxic_types_page
+from v2.output.counts.sentiment_type_counts import count_sentiment_types
+from v2.output.counts.toxic_type_counts import count_toxic_types
 
 st.set_page_config(
     page_title='StreamVis',
@@ -97,6 +99,9 @@ def show_stats():
     else:
         new_members_count = 0
 
+    total_positive, total_neutral, total_negative = count_sentiment_types(st.session_state['comments_json']).values()
+    total_toxic = count_toxic_types(st.session_state['comments_json']).get('toxicity', 0)
+
     def create_card(title, value, card_color="lightgray", text_color="black"):
         fig = go.Figure(go.Indicator(
             mode="number",
@@ -118,14 +123,18 @@ def show_stats():
     with col1:
         st.plotly_chart(create_card("Total Comments", total_comments, card_color="lightblue", text_color="darkblue"), use_container_width=True)
         st.plotly_chart(create_card("Total Words", total_words, card_color="lightgreen", text_color="darkgreen"), use_container_width=True)
+        st.plotly_chart(create_card("Positive Sentiment Comments %", (total_positive / total_comments) * 100, card_color="lightgreen", text_color="darkgreen"), use_container_width=True)
+        st.plotly_chart(create_card("Toxic Comments %", (total_toxic / total_comments) * 100, card_color="red", text_color="white"), use_container_width=True)
 
     with col2:
         st.plotly_chart(create_card("Total Authors", total_authors, card_color="lightyellow", text_color="darkorange"), use_container_width=True)
         st.plotly_chart(create_card("Unique Words", unique_words, card_color="lightpink", text_color="darkred"), use_container_width=True)
+        st.plotly_chart(create_card("Neutral Sentiment Comments %", (total_neutral / total_comments) * 100, card_color="lightyellow", text_color="darkorange"), use_container_width=True)
 
     with col3:
         st.plotly_chart(create_card("Avg Comments/Person", avg_comments_per_person, card_color="lightgray", text_color="black"), use_container_width=True)
         st.plotly_chart(create_card("New Members", new_members_count, card_color="lightgray", text_color="black"), use_container_width=True)
+        st.plotly_chart(create_card("Negative Sentiment Comments %", (total_negative / total_comments) * 100, card_color="red", text_color="white"), use_container_width=True)
 
 def show_new_members():
     st.title('Members')
