@@ -44,5 +44,5 @@ streamlit run app.py
 #### Tips:
 1. Ensure you are using the venv when trying to run, or else it will fail
 2. Remember to install the requirements in the venv
-3. If the commands are not working try using only **python** as prefix instead of **pytthon3** 
+3. If the commands are not working try using only **python** as prefix instead of **python3** 
 
