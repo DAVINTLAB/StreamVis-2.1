@@ -7,6 +7,39 @@ import pandas as pd
 import os
 import pathlib
 from datetime import datetime
+import io
+
+# =============================================================================
+# Data Treatment to Open Screen
+# =============================================================================
+
+def generate_download_data(dataframe, format_type, filename):
+    """
+    Gera os dados em diferentes formatos para download
+    """
+    if format_type == 'csv':
+        buffer = io.StringIO()
+        dataframe.to_csv(buffer, index=False)
+        return buffer.getvalue().encode('utf-8'), f"{filename}.csv", "text/csv"
+
+    elif format_type == 'xlsx':
+        buffer = io.BytesIO()
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            dataframe.to_excel(writer, index=False, sheet_name='Classificacao')
+        return buffer.getvalue(), f"{filename}.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+
+    elif format_type == 'json':
+        buffer = io.StringIO()
+        dataframe.to_json(buffer, orient='records', indent=2)
+        return buffer.getvalue().encode('utf-8'), f"{filename}.json", "application/json"
+
+    elif format_type == 'parquet':
+        buffer = io.BytesIO()
+        dataframe.to_parquet(buffer, index=False)
+        return buffer.getvalue(), f"{filename}.parquet", "application/octet-stream"
+
+    else:
+        raise ValueError(f"Formato não suportado: {format_type}")
 
 # =============================================================================
 # Data Treatment to Open Screen
@@ -408,6 +441,10 @@ st.markdown("---")
 st.markdown("### Etapa 4: Configuração e Execução")
 st.markdown("Configure e execute a classificação de texto no seu dataset.")
 
+# Info about save and download options
+st.info("💡 **Opções de Saída**: O arquivo será salvo localmente no diretório especificado e também estará disponível para download em múltiplos formatos após a execução.")
+st.markdown("")
+
 # Check if required components are available
 currentTask = st.session_state.currentTaskInEdition
 hasDataset = currentTask.inputDataset is not None
@@ -520,7 +557,7 @@ with formatCol:
 # Show preview of full file name
 if outputFileName.strip():
     fullFileName = f"{outputFileName.strip()}.{outputFormat}"
-    st.info(f"💡 **Arquivo final com a classificação**: {fullFileName}")
+    st.info(f"� **Arquivo local**: {fullFileName} | 📥 **Downloads**: Disponíveis em múltiplos formatos após execução")
 
 # Check if configuration is complete
 if outputDirectory.strip() and outputFileName.strip():
@@ -710,24 +747,74 @@ if st.session_state.executionResults:
         st.markdown("#### Resumo dos Resultados")
 
         if currentTask.outputDataset is not None:
-            # Show sample results with all probability columns
-            st.markdown("**Amostra dos Resultados:**")
+            # Create two columns for results and download options
+            resultsCol, downloadCol = st.columns([2, 1])
 
-            # Get all probability columns (columns starting with 'prob_')
-            prob_columns = [col for col in currentTask.outputDataset.columns if col.startswith('prob_')]
+            with resultsCol:
+                # Show sample results with all probability columns
+                st.markdown("**Amostra dos Resultados:**")
 
-            # Select columns to show in sample
-            display_columns = [selectedTextColumn, 'predicted_label', 'confidence_score'] + prob_columns
-            available_columns = [col for col in display_columns if col in currentTask.outputDataset.columns]
+                # Get all probability columns (columns starting with 'prob_')
+                prob_columns = [col for col in currentTask.outputDataset.columns if col.startswith('prob_')]
 
-            sampleResults = currentTask.outputDataset[available_columns].head(10)
-            st.dataframe(sampleResults, use_container_width=True)
+                # Select columns to show in sample
+                display_columns = [selectedTextColumn, 'predicted_label', 'confidence_score'] + prob_columns
+                available_columns = [col for col in display_columns if col in currentTask.outputDataset.columns]
 
-            # Show information about probability columns
-            if prob_columns:
-                st.info(f"💡 **Colunas de Probabilidade**: O modelo retornou probabilidades para {len(prob_columns)} classes: {', '.join([col.replace('prob_', '') for col in prob_columns])}")
+                sampleResults = currentTask.outputDataset[available_columns].head(10)
+                st.dataframe(sampleResults, use_container_width=True)
 
+                # Show information about probability columns
+                if prob_columns:
+                    st.info(f"💡 **Colunas de Probabilidade**: O modelo retornou probabilidades para {len(prob_columns)} classes: {', '.join([col.replace('prob_', '') for col in prob_columns])}")
 
+            with downloadCol:
+                st.markdown("**Opções de Download:**")
+
+                # Get the base filename without extension
+                base_filename = st.session_state.outputFileName or f"classificacao_{datetime.now().strftime('%d%m%Y_%H%M%S')}"
+
+                # Download buttons for different formats
+                for format_type in ['csv', 'xlsx', 'json', 'parquet']:
+                    try:
+                        download_data, filename, mime_type = generate_download_data(
+                            currentTask.outputDataset,
+                            format_type,
+                            base_filename
+                        )
+
+                        format_icons = {
+                            'csv': '📊',
+                            'xlsx': '📈',
+                            'json': '📋',
+                            'parquet': '🗃️'
+                        }
+
+                        st.download_button(
+                            label=f"{format_icons.get(format_type, '📄')} Download {format_type.upper()}",
+                            data=download_data,
+                            file_name=filename,
+                            mime=mime_type,
+                            use_container_width=True,
+                            help=f"Baixar dados classificados em formato {format_type.upper()}"
+                        )
+                    except Exception as e:
+                        st.error(f"Erro ao gerar {format_type}: {str(e)}")
+
+                # Additional information
+                st.markdown("---")
+                st.markdown("**Informações do Arquivo:**")
+                st.metric("Total de Linhas", f"{len(currentTask.outputDataset):,}")
+                st.metric("Total de Colunas", len(currentTask.outputDataset.columns))
+
+                # Show file size estimate
+                memory_usage_mb = currentTask.outputDataset.memory_usage(deep=True).sum() / (1024 * 1024)
+                st.metric("Tamanho Estimado", f"{memory_usage_mb:.1f} MB")
+
+                # Show where the file was saved locally
+                if 'outputPath' in results:
+                    st.markdown("**Arquivo Local:**")
+                    st.success(f"💾 Salvo em:\n`{results['outputPath']}`")
 
     else:
         st.error(f"❌ Erro na execução: {results['error']}")
