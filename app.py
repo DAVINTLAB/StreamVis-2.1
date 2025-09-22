@@ -531,7 +531,6 @@ def text_classification_page():
     if outputFileName.strip():
         fullFileName = f"{outputFileName.strip()}.{outputFormat}"
         st.info(f"💡 **Final file with classification**: {fullFileName}")
-        st.info(f"📁 **Location**: Downloads folder ({outputDirectory})")
 
     # Check if configuration is complete
     if outputFileName.strip():
