@@ -11,7 +11,7 @@ from v2.app_pages.sentiment.sentiment_analysis import sentiment_analysis_page
 from v2.app_pages.toxic.toxic_types import toxic_types_page
 from v2.output.counts.sentiment_type_counts import count_sentiment_types
 from v2.output.counts.toxic_type_counts import count_toxic_types
-from Task import Task
+from text_classification.Task import Task
 
 st.set_page_config(
     page_title='StreamVis',
@@ -160,7 +160,7 @@ def upload_json(json_file):
 def text_classification_page():
     """
     Text Classification Page
-    Implements the complete text classification workflow in 5 steps
+    Implements the complete text classification workflow in 3 steps
     """
     import pandas as pd
     import pathlib
@@ -170,11 +170,11 @@ def text_classification_page():
     # Check if there is a current task being edited
     if 'currentTaskInEdition' not in st.session_state or st.session_state.currentTaskInEdition is None:
         # Create a new task if none exists
-        st.session_state.currentTaskInEdition = Task("New Classification", "Text Classification")
+        st.session_state.currentTaskInEdition = Task("Text Classification", "Text Classification")
 
     # Check if the current task is of the correct type
     if st.session_state.currentTaskInEdition.taskType != "Text Classification":
-        st.session_state.currentTaskInEdition = Task("New Classification", "Text Classification")
+        st.session_state.currentTaskInEdition = Task("Text Classification", "Text Classification")
 
     # Initialize dataset state
     if 'datasetLoaded' not in st.session_state:
@@ -186,36 +186,9 @@ def text_classification_page():
     st.markdown("---")
 
     # =============================================================================
-    # Step 1: Task Setup
+    # Step 1: Dataset Selection
     # =============================================================================
-    st.markdown("### Step 1: Task Setup")
-
-    # Task name
-    taskName = st.text_input(
-        "Define the name of your text classification task.",
-        value=st.session_state.currentTaskInEdition.taskName,
-        placeholder="Ex: Sentiment Analysis - Product Reviews",
-        help="Choose a descriptive name to identify your task"
-    )
-
-    # Update current task
-    st.session_state.currentTaskInEdition.SetTaskName(taskName)
-    st.session_state.currentTaskInEdition.SetTaskType("Text Classification")
-
-    # Check if the fields are filled in
-    if taskName.strip():
-        taskConfigured = True
-        st.success("✅ Task configuration completed!")
-    else:
-        taskConfigured = False
-        st.warning("⚠️ Fill in the task name to continue.")
-
-    st.markdown("---")
-
-    # =============================================================================
-    # Step 2: Dataset Selection
-    # =============================================================================
-    st.markdown("### Step 2: Dataset Selection")
+    st.markdown("### Step 1: Dataset Selection")
     st.markdown("Upload a new file for text classification.")
 
     uploadedFile = st.file_uploader("", type=['csv', 'json', 'xlsx', 'xls'])
@@ -287,9 +260,9 @@ def text_classification_page():
     st.markdown("---")
 
     # =============================================================================
-    # Step 3: Model Selection
+    # Step 2: Model Selection
     # =============================================================================
-    st.markdown("### Step 3: Model Selection")
+    st.markdown("### Step 2: Model Selection")
     st.markdown("Choose a Hugging Face model for text classification.")
 
     # Default model
@@ -492,9 +465,9 @@ def text_classification_page():
     st.markdown("---")
 
     # =============================================================================
-    # Step 4: Configuration and Execution
+    # Step 3: Configuration and Execution
     # =============================================================================
-    st.markdown("### Step 4: Configuration and Execution")
+    st.markdown("### Step 3: Configuration and Execution")
 
     # Check if required components are available
     currentTask = st.session_state.currentTaskInEdition
@@ -516,67 +489,21 @@ def text_classification_page():
 
     selectedTextColumn = st.session_state.selectedTextColumn
 
-    # Default path suggestions
-    defaultPaths = [
-        str(pathlib.Path.home() / "Desktop"),
-        str(pathlib.Path.home() / "Documents"),
-        str(pathlib.Path.home() / "Downloads"),
-    ]
+    # Set Downloads folder as fixed output directory
+    outputDirectory = str(pathlib.Path.home() / "Downloads")
 
     # Initialize output settings in session state if not exists
-    if 'outputDirectory' not in st.session_state:
-        st.session_state.outputDirectory = defaultPaths[0]
     if 'outputFileName' not in st.session_state:
         st.session_state.outputFileName = ""
     if 'outputFormat' not in st.session_state:
         st.session_state.outputFormat = "csv"
 
-    # Get current suggested path
-    currentSuggestion = st.session_state.outputDirectory
-
-    # Create columns for text input and buttons
-    textCol, btn1Col, btn2Col, btn3Col = st.columns([8.5, 0.5, 0.5, 0.5])
-
-    with textCol:
-        outputDirectory = st.text_input(
-            label="Output Directory:",
-            value=currentSuggestion,
-            placeholder="Ex: C:/Users/user/Desktop/results/",
-            help="Directory where the classified file will be saved",
-        )
-
-    with btn1Col:
-        # Adiciona um pequeno espaço no topo para alinhar
-        st.markdown("<div style='margin-top: 27px;'></div>", unsafe_allow_html=True)
-        if st.button("📋", help="Desktop", use_container_width=True, key="desktop_btn"):
-            st.session_state.outputDirectory = defaultPaths[0]
-            st.rerun()
-
-    with btn2Col:
-        st.markdown("<div style='margin-top: 27px;'></div>", unsafe_allow_html=True)
-        if st.button("📁", help="Documents", use_container_width=True, key="docs_btn"):
-            st.session_state.outputDirectory = defaultPaths[1]
-            st.rerun()
-
-    with btn3Col:
-        st.markdown("<div style='margin-top: 27px;'></div>", unsafe_allow_html=True)
-        if st.button("⬇️", help="Downloads", use_container_width=True, key="downloads_btn"):
-            st.session_state.outputDirectory = defaultPaths[2]
-            st.rerun()
-
-    # Update output directory in session state
-    st.session_state.outputDirectory = outputDirectory
-
     # Create two columns for file name and format
     nameCol, formatCol = st.columns([8.5, 1.5])
 
     with nameCol:
-        # Default file name with timestamp and task info
-        taskName = currentTask.taskName or "text_classification"
-        # Clean task name for filename (remove special characters)
-        cleanTaskName = "".join(c for c in taskName if c.isalnum() or c in (' ', '-', '_')).rstrip()
-        cleanTaskName = cleanTaskName.replace(' ', '_').lower()
-        defaultFileName = f"{cleanTaskName}_{datetime.now().strftime('%d-%m-%Y')}"
+        # Default file name with timestamp
+        defaultFileName = f"text_classification_{datetime.now().strftime('%d-%m-%Y')}"
 
         outputFileName = st.text_input(
             "File name (without extension):",
@@ -600,16 +527,17 @@ def text_classification_page():
         # Update output format in session state
         st.session_state.outputFormat = outputFormat
 
-    # Show preview of full file name
+    # Show preview of full file name and location
     if outputFileName.strip():
         fullFileName = f"{outputFileName.strip()}.{outputFormat}"
         st.info(f"💡 **Final file with classification**: {fullFileName}")
+        st.info(f"📁 **Location**: Downloads folder ({outputDirectory})")
 
     # Check if configuration is complete
-    if outputDirectory.strip() and outputFileName.strip():
+    if outputFileName.strip():
         st.success("✅ Output configuration completed!")
     else:
-        st.warning("⚠️ Fill in all fields to continue.")
+        st.warning("⚠️ Fill in the file name to continue.")
 
     # Initialize session state for execution
     if 'isExecuting' not in st.session_state:
@@ -621,12 +549,10 @@ def text_classification_page():
     st.markdown("#### Execution")
 
     # Get configuration from session state
-    outputDirectory = st.session_state.outputDirectory
     outputFileName = st.session_state.outputFileName
     outputFormat = st.session_state.outputFormat
 
     canExecute = (selectedTextColumn and
-                  outputDirectory.strip() and
                   outputFileName.strip() and
                   not st.session_state.isExecuting)
 
@@ -641,12 +567,9 @@ def text_classification_page():
     if executeButton and canExecute:
         st.session_state.isExecuting = True
 
-        # Validate output directory
+        # Use Downloads directory
         try:
-            # Normalize path
-            outputDirectory = os.path.normpath(outputDirectory.strip())
-
-            # Create directory if it doesn't exist
+            # Create directory if it doesn't exist (though Downloads should always exist)
             if not os.path.exists(outputDirectory):
                 os.makedirs(outputDirectory, exist_ok=True)
 
@@ -787,6 +710,55 @@ def text_classification_page():
                 # Show information about probability columns
                 if prob_columns:
                     st.info(f"💡 **Probability Columns**: The model returned probabilities for {len(prob_columns)} classes: {', '.join([col.replace('prob_', '') for col in prob_columns])}")
+
+                # Add download button for the classified dataset
+                st.markdown("**Download Results:**")
+
+                # Get file path and create download button based on format
+                outputPath = results.get('outputPath', '')
+                outputFormat = results.get('outputFormat', 'csv')
+
+                if os.path.exists(outputPath):
+                    # Read file content for download
+                    try:
+                        if outputFormat == 'csv':
+                            file_data = currentTask.outputDataset.to_csv(index=False).encode('utf-8')
+                            mime_type = 'text/csv'
+                        elif outputFormat == 'xlsx':
+                            import io
+                            buffer = io.BytesIO()
+                            currentTask.outputDataset.to_excel(buffer, index=False, engine='openpyxl')
+                            file_data = buffer.getvalue()
+                            mime_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                        elif outputFormat == 'json':
+                            file_data = currentTask.outputDataset.to_json(orient='records', indent=2).encode('utf-8')
+                            mime_type = 'application/json'
+                        elif outputFormat == 'parquet':
+                            import io
+                            buffer = io.BytesIO()
+                            currentTask.outputDataset.to_parquet(buffer, index=False)
+                            file_data = buffer.getvalue()
+                            mime_type = 'application/octet-stream'
+
+                        # Extract filename from path
+                        filename = os.path.basename(outputPath)
+
+                        st.download_button(
+                            label=f"📥 Download {filename}",
+                            data=file_data,
+                            file_name=filename,
+                            mime=mime_type,
+                            use_container_width=True,
+                            help=f"Download the classified dataset in {outputFormat.upper()} format"
+                        )
+
+                        st.success(f"✅ File ready for download: {filename}")
+
+                    except Exception as e:
+                        st.error(f"❌ Error preparing download: {str(e)}")
+                        st.info(f"💡 File saved locally at: {outputPath}")
+                else:
+                    st.warning(f"⚠️ Output file not found at: {outputPath}")
 
         else:
             st.error(f"❌ Execution error: {results['error']}")
