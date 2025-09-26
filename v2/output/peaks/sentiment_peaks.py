@@ -26,7 +26,7 @@ def get_sentiments_peak(sentiment: str, dict_data: dict) -> list:
         }
         for entry in dict_data:
             if start_time <= entry["time_in_seconds"] < end_time:
-                if(entry["sentiment"] == sentiment):
+                if(entry.get("sentiment") == sentiment):
                     peak["sentiment"] += 1
                 peak["count"] += 1
         peak["start_time"] = start_time
@@ -36,6 +36,6 @@ def get_sentiments_peak(sentiment: str, dict_data: dict) -> list:
 
     print(f"Peaks found: {peaks}")
     # Returns the 5 highest peaks
-    highest_peaks = sorted(peaks, key=lambda x: x["sentiment"]/x["count"], reverse=True)[:5]
+    highest_peaks = sorted(peaks, key=lambda x: (x["sentiment"]/x["count"] if x["count"] > 0 else 0), reverse=True)[:5]
     print(f"Highest peaks: {highest_peaks}")
     return highest_peaks

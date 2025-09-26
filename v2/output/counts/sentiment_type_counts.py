@@ -20,7 +20,8 @@ def count_sentiment_types(data):
     ]
 
     for item in data:
-        sentiment = item['sentiment']
-        sentiment_types_count[sentiment] += 1
+        sentiment = item.get('sentiment')  # retorna None se não existir
+        if sentiment is not None:
+            sentiment_types_count[sentiment] += 1
 
     return dict(sentiment_types_count)
