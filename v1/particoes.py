@@ -5,15 +5,12 @@ def parse_time(time):
     h, m, s = map(int, time.split(':'))
     return timedelta(hours=h, minutes=m, seconds=s)
 
-def get_partitions(comments_json, n=5):
-    with open(comments_json, encoding='utf-8') as file:
-        comments = json.load(file)
-    
-    for comment in comments:
+def get_partitions(data, n=5):
+    for comment in data:
         comment['timestamp'] = parse_time(comment['time_elapsed'])
 
-    first_comment = min(comments, key=lambda x: x['timestamp'])
-    last_comment = max(comments, key=lambda x: x['timestamp'])
+    first_comment = min(data, key=lambda x: x['timestamp'])
+    last_comment = max(data, key=lambda x: x['timestamp'])
     total_time = last_comment['timestamp'] - first_comment['timestamp']
 
     partition_size = total_time / n
@@ -27,9 +24,7 @@ def get_partitions(comments_json, n=5):
             'end': first_comment['timestamp'] + partition_size * (index + 1)
         }
     
-
-
-    for comment in comments:
+    for comment in data:
         for index, partition in partitions.items():
             if partition['start'] <= comment['timestamp'] < partition['end']:
                 partition['comments'].append(comment)
@@ -44,7 +39,5 @@ def get_partitions(comments_json, n=5):
     return partitions
 
     
-
-
-if __name__ == '__main__':
-    get_partitions('comments.json')
+#if __name__ == '__main__':
+#    get_partitions('data.json')

@@ -3,7 +3,7 @@ from v2.output.counts.scream_index_counts import scream_index_mean
 import streamlit as st
 import plotly.graph_objects as go
 
-def scream_index_page(json_file_path:str = 'input/comments.json'):
+def scream_index_page():
     """ Streamlit page to display the Scream Index.
     This function creates a Streamlit page that displays the mean Scream Index
     and a card with the Scream Index value.
@@ -43,12 +43,11 @@ def scream_index_page(json_file_path:str = 'input/comments.json'):
     st.title('Scream Index Analysis')
     st.plotly_chart(create_gauge_chart(
         "Scream index mean",
-        scream_index_mean(json_file_path)
+        scream_index_mean(st.session_state['comments_file'])
     ), use_container_width=True)
     
     with st.expander("Messages above 0.7 scream index", expanded=True):
-        with open(json_file_path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = st.session_state['comments_file']
         scream_indices = [obj for obj in data if obj.get('scream_index', 0) > 0.70]
         st.dataframe(
             data=scream_indices,
@@ -56,8 +55,8 @@ def scream_index_page(json_file_path:str = 'input/comments.json'):
         )
 
     st.title('Top Commenters by Scream Index')
-    with open(json_file_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+
+    data = st.session_state['comments_file']
     commenters = {}
     scream_indices = [obj for obj in data if obj.get('scream_index', 0) > 0.70]
     for obj in scream_indices:

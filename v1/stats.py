@@ -4,10 +4,7 @@ from matplotlib import dates as mdates
 import pandas as pd
 from collections import Counter
 
-def get_author_comments(author, comments_json, interval=30):
-    with open(comments_json, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-
+def get_author_comments(author, data, interval=30):
     author_comments = []
     for item in data:
         if item['author'] == author:
@@ -36,10 +33,7 @@ def get_author_comments(author, comments_json, interval=30):
 
     return path, author_filtered_comments
 
-def get_top_authors(comments_json, n=5):
-    with open(comments_json, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-
+def get_top_authors(data, n=5):
     filter_data = [item for item in data if item['message'].strip()]
 
     authors = [item['author'] for item in filter_data]

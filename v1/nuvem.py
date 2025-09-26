@@ -14,7 +14,6 @@ def file_to_json(json_file):
 nltk.download('stopwords')
 
 def gerar_nuvem_palavras(json_data, complemento=''):
-
     all_words = []
 
     emoji_pattern = r':[a-zA-Z0-9-]+:'

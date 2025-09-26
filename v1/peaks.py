@@ -16,9 +16,7 @@ def format_timedelta(td):
 def format_datetime(dt):
     return dt.strftime('%H:%M')
 
-def get_peaks(comments_json, mnt=10, top=3):
-    comments_data = file_to_json(comments_json)
-
+def get_peaks(comments_data, mnt=10, top=3):
     df = pd.DataFrame(comments_data)
 
     df['time_elapsed'] = pd.to_datetime(df['time_elapsed'])
@@ -83,5 +81,5 @@ def get_word_context(data, word):
     word_lower = word.lower()
     return [comment['message'] for comment in data if word_lower in comment['message'].lower()]
 
-if __name__ == '__main__':
-    get_peaks('comments.json')
+#if __name__ == '__main__':
+#    get_peaks('comments.json')

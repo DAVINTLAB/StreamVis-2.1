@@ -6,13 +6,12 @@ from v2.output.charts.negativity_gauge_meter import *
 from v2.output.peaks.sentiment_peaks import get_sentiments_peak
 
 @st.cache_data
-def load_and_process_data(path: str):
+def load_and_process_data():
     """
     Loads the JSON, converts time strings to seconds and returns the data
     """
     try:
-        with open(path, 'r', encoding='utf-8') as f:
-            data = json.load(f)
+        data = st.session_state['comments_file']
         
         for comment in data:
             comment['time_in_seconds'] = time_str_to_seconds(comment.get('time_elapsed', '0:0'))
@@ -22,12 +21,14 @@ def load_and_process_data(path: str):
         st.error(f"Erro ao carregar o arquivo JSON em '{path}': {e}")
         return []
 
-def sentiment_analysis_page(path:str = 'input/comments.json'):
+def sentiment_analysis_page():
     """
     Returns page for sentiment types analysis.
     This function sets up the Streamlit page configuration and sidebar selection for sentiment types analysis.
     """
-    data = load_and_process_data(path)
+    data = load_and_process_data()
+    st.session_state['comments_file'] = data
+    
     # Adiciona o tempo em segundos a cada comentário para facilitar a filtragem (o json nao sera modificado)
     for comment in data:
         comment['time_in_seconds'] = time_str_to_seconds(comment.get('time_elapsed', '0:0'))
@@ -79,7 +80,7 @@ def sentiment_analysis_page(path:str = 'input/comments.json'):
     with st.expander('Sentiment Types in General', expanded=True):
         st.plotly_chart(
             create_sentiment_types_chart(
-                count_sentiment_types(path)
+                count_sentiment_types(data)
             ),
             use_container_width=True
         )
