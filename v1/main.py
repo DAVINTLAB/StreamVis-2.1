@@ -18,9 +18,15 @@ def get_comments_file_path():
     return "comments.json"
 
 def comments_collect_visualization():
-    st.title('Comment Collection')
+    st.title('Comments Collection')
     st.text(" If you already have a JSON file with comments, go to page 'Upload JSON' to upload it and skip this step.")
     st.text(" Tutorial video to register and save the GOOGLE_API_KEY: https://youtu.be/d4gPrwpzTkc ")
+    
+    if 'is_collecting' not in st.session_state:
+        st.session_state['is_collecting'] = False
+    if 'collection_count' not in st.session_state:
+        st.session_state['collection_count'] = 0
+    
     api_key = st.text_input("API Key (Google)", type= "password", key= "google_api_key")
     if api_key:
         st.session_state['GOOGLE_API_KEY'] = api_key
@@ -38,49 +44,69 @@ def comments_collect_visualization():
     if video_id:
         st.session_state['VIDEO_ID'] = video_id
 
-    # Opção para iniciar do zero para este vídeo
     start_fresh = st.checkbox("Start fresh for this video", value=False)
 
-    if st.button("Start Collection", type = "secondary"):
-        if not api_key or not video_id:
-            st.error("Please provide both API Key and Video ID")
-        else:
-            st.session_state['GOOGLE_API_KEY'] = api_key
-            st.session_state['VIDEO_ID'] = video_id
-            if start_fresh:
-                # Limpa o arquivo de comentários específico deste vídeo
-                save_comments([])
-            
-            with st.spinner("Collecting comments..."):
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("Start Collection", type="secondary", disabled=st.session_state['is_collecting']):
+            if not api_key or not video_id:
+                st.error("Please provide both API Key and Video ID")
+            else:
+                st.session_state['GOOGLE_API_KEY'] = api_key
+                st.session_state['VIDEO_ID'] = video_id
+                if start_fresh:
+                    save_comments([])
+                    st.session_state['collection_count'] = 0
+                
                 live_chat_id, live_start_time_utc = get_live_details()
                 
                 if live_chat_id and live_start_time_utc:
-                    st.info("Detected: Live stream")
-                    new_comments = get_chat_messages(live_chat_id, live_start_time_utc)
-                    new_count = append_new_comments(new_comments)
-                    st.success(f" Collected and added {new_count} new comments from live chat")
+                    st.session_state['is_collecting'] = True
+                    st.session_state['live_chat_id'] = live_chat_id
+                    st.session_state['live_start_time_utc'] = live_start_time_utc
+                    st.success("Collection started! Click 'Stop Collection' to stop.")
+                    st.rerun()
                 else:
-                    st.info("Detected: Regular video (or finished live)")
-                    new_comments = get_video_comments()
-                    if new_comments is not None:
-                        new_count = append_new_comments(new_comments)
-                        st.success(f" Collected and added {new_count} new comments from video")
-                    else:
-                        st.error(" Could not retrieve comments. Check API Key and Video ID.")
-                        new_count = 0
+                    st.error(" This is not an active live stream. Only live streams are supported for comment collection.")
+                    st.info(" Please provide a Video ID from an active YouTube live stream.")
+    
+    with col2:
+        if st.button("Stop Collection", type="primary", disabled=not st.session_state['is_collecting']):
+            st.session_state['is_collecting'] = False
+            st.success(f"Collection stopped! Total comments collected: {st.session_state['collection_count']}")
+            st.rerun()
+    
+    if st.session_state['is_collecting']:
+        st.info(f"Collecting... Total comments so far: {st.session_state['collection_count']}")
         
-        # Adicionar botão de download
-        comments = load_existing_comments()
-        if comments:
-            json_string = json.dumps(comments, indent=2, ensure_ascii=False)
-            # Define o nome do arquivo de download específico por vídeo
-            download_name = f"comments_{st.session_state.get('VIDEO_ID','')}.json" if st.session_state.get('VIDEO_ID') else "comments.json"
-            st.download_button(
-                label=" Download Collected Comments",
-                data=json_string,
-                file_name=download_name,
-                mime="application/json"
-            )
+        live_chat_id = st.session_state.get('live_chat_id')
+        live_start_time_utc = st.session_state.get('live_start_time_utc')
+        
+        if live_chat_id and live_start_time_utc:
+            new_comments = get_chat_messages(live_chat_id, live_start_time_utc)
+            new_count = append_new_comments(new_comments)
+            st.session_state['collection_count'] += new_count
+            
+            if new_count > 0:
+                st.success(f"Added {new_count} new comments")
+            
+            time.sleep(WAIT_TIME)
+            st.rerun()
+    
+    
+    st.divider()
+    comments = load_existing_comments()
+    if comments:
+        json_string = json.dumps(comments, indent=2, ensure_ascii=False)
+        
+        download_name = f"comments_{st.session_state.get('VIDEO_ID','')}.json" if st.session_state.get('VIDEO_ID') else "comments.json"
+        st.download_button(
+            label="Download Collected Comments",
+            data=json_string,
+            file_name=download_name,
+            mime="application/json"
+        )
             
 
 def get_live_details():
@@ -98,61 +124,6 @@ def get_live_details():
                 live_start_time = live_details["actualStartTime"]
                 return live_details.get("activeLiveChatId"), parser.isoparse(live_start_time)
     return None, None
-
-def get_video_comments():
-    """Coleta comentários de vídeos regulares do YouTube"""
-    comments_list = []
-    api_key = st.session_state.get('GOOGLE_API_KEY')
-    video_id = st.session_state.get('VIDEO_ID')
-    
-    video_url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={video_id}&key={api_key}"
-    video_response = requests.get(video_url)
-    video_data = video_response.json()
-    
-    if "items" not in video_data or len(video_data["items"]) == 0:
-        return None
-    
-    video_publish_time = video_data["items"][0]["snippet"]["publishedAt"]
-    video_start_time_utc = parser.isoparse(video_publish_time)
-    
-    next_page_token = None
-    
-    while True:
-        comments_url = f"https://www.googleapis.com/youtube/v3/commentThreads?part=snippet&videoId={video_id}&maxResults=100&key={api_key}"
-        
-        if next_page_token:
-            comments_url += f"&pageToken={next_page_token}"
-        
-        comments_response = requests.get(comments_url)
-        comments_data = comments_response.json()
-        
-        if "items" not in comments_data:
-            break
-        
-        for item in comments_data["items"]:
-            comment = item["snippet"]["topLevelComment"]["snippet"]
-            comment_id = item["snippet"]["topLevelComment"]["id"]
-            author = comment["authorDisplayName"]
-            message = comment["textDisplay"]
-            timestamp = comment["publishedAt"]
-            
-            comment_time_utc = parser.isoparse(timestamp)
-            time_elapsed = comment_time_utc - video_start_time_utc
-            time_elapsed_str = str(time_elapsed).split('.')[0]
-            
-            comment_entry = {
-                "id": comment_id,
-                "time_elapsed": time_elapsed_str,
-                "author": author,
-                "message": message
-            }
-            comments_list.append(comment_entry)
-        
-        next_page_token = comments_data.get("nextPageToken")
-        if not next_page_token:
-            break
-    
-    return comments_list
 
 def get_chat_messages(live_chat_id, live_start_time_utc):
     """Coleta mensagens de chat ao vivo do YouTube"""
@@ -173,7 +144,7 @@ def get_chat_messages(live_chat_id, live_start_time_utc):
             timestamp = item["snippet"].get("publishedAt")
             
             if not timestamp or not comment_id:
-                continue # Ignora comentários sem timestamp ou ID - Podia dar problema sem
+                continue 
 
             message_time_utc = parser.isoparse(timestamp)
             
