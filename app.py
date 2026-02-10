@@ -14,7 +14,7 @@ from v2.app_pages.toxic.toxic_types import toxic_types_page
 from v2.output.counts.sentiment_type_counts import count_sentiment_types
 from v2.output.counts.toxic_type_counts import count_toxic_types
 from text_classification.CustomModelPage import custom_model_classification_page
-from text_classification.DetoxifyPage import detoxify_page
+from text_classification.ClassificationPage import classification_page
 from text_classification.ModelComparisonsPage import model_comparisons_page
 
 st.set_page_config(
@@ -52,8 +52,8 @@ def landing_page():
     **1. Upload a JSON File**  
     - Click the *Browse Files* button above to upload a JSON file.
                     
-    **2. Run Detoxify (toxicity classification)**  
-    - If you haven’t run **Detoxify** yet, go to the **"Detoxify Classification"** option in the sidebar.  
+    **2. Run Classification (toxicity and scream index classification)**  
+    - If you haven’t run **Classification** yet, go to the **"Classification"** option in the sidebar.  
     - The model will analyze all comments and classify them according to their toxicity.  
     - This process may take **several minutes**.  
     - Once it’s finished, you can **download the resulting file** to check the new fields added.  
@@ -193,7 +193,7 @@ def upload_json(json_file):
 
     st.session_state['comments_file'] = data
 
-pagina = st.sidebar.selectbox('Page', ['Comments Collection', 'Upload Json','Detoxify Classification', 'Custom Model Classification', 'Model Comparisons', 'Comments peak', 'Top comment authors', 'Partitions', 'Stats', 'New members', 'Toxic Speech', 'Scream Index', 'Sentiment Analysis'])
+pagina = st.sidebar.selectbox('Page', ['Comments Collection', 'Upload Json','Classification', 'Custom Model Classification', 'Model Comparisons', 'Comments peak', 'Top comment authors', 'Partitions', 'Stats', 'New members', 'Toxic Speech', 'Scream Index', 'Sentiment Analysis'])
 
 if pagina == 'Comments peak':
     comments_peak()
@@ -213,8 +213,8 @@ elif pagina == 'Sentiment Analysis':
     sentiment_analysis_page()
 elif pagina == 'Custom Model Classification':
     custom_model_classification_page()
-elif pagina == 'Detoxify Classification':
-    detoxify_page()
+elif pagina == 'Classification':
+    classification_page()
 elif pagina == 'Model Comparisons':
     model_comparisons_page()
 elif pagina == 'Comments Collection':
