@@ -44,7 +44,7 @@ def comments_collect_visualization():
     if video_id:
         st.session_state['VIDEO_ID'] = video_id
 
-    start_fresh = st.checkbox("Start fresh for this video", value=False)
+    start_fresh = True
 
     col1, col2 = st.columns(2)
     
