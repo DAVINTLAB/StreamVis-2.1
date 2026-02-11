@@ -5,7 +5,6 @@ from v2.output.counts.sentiment_type_counts import count_sentiment_types
 from v2.output.charts.negativity_gauge_meter import *
 from v2.output.peaks.sentiment_peaks import get_sentiments_peak
 
-@st.cache_data
 def load_and_process_data():
     """
     Loads the JSON, converts time strings to seconds and returns the data
@@ -18,7 +17,7 @@ def load_and_process_data():
         
         return data
     except (FileNotFoundError, json.JSONDecodeError) as e:
-        st.error(f"Erro ao carregar o arquivo JSON em '{path}': {e}")
+        st.error(f"Erro ao carregar dados: {e}")
         return []
 
 def sentiment_analysis_page():

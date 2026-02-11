@@ -144,6 +144,7 @@ def get_chat_messages(live_chat_id, live_start_time_utc):
             timestamp = item["snippet"].get("publishedAt")
             
             if not timestamp or not comment_id:
+                
                 continue 
 
             message_time_utc = parser.isoparse(timestamp)

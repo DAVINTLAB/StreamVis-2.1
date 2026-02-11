@@ -136,7 +136,10 @@ def show_stats():
     else:
         new_members_count = 0
 
-    total_positive, total_neutral, total_negative = count_sentiment_types(st.session_state['comments_file']).values()
+    sentiment_counts = count_sentiment_types(st.session_state['comments_file'])
+    total_positive = sentiment_counts.get('POS', 0)
+    total_neutral = sentiment_counts.get('NEU', 0)
+    total_negative = sentiment_counts.get('NEG', 0)
     total_toxic = count_toxic_types(st.session_state['comments_file']).get('toxicity', 0)
 
     def create_card(title, value, card_color="lightgray", text_color="black"):
