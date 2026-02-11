@@ -114,6 +114,11 @@ def show_partitions():
             st.write(f'End: {partition["end"]}')
             st.image(gerar_nuvem_palavras(partition['comments'], complemento=f'_particao_{index}'))
             top_words_count = get_top_words(partition['comments'])
+            top_words_table = top_words_count.head(10).reset_index()
+            top_words_table.columns = ["word", "count"]
+            top_words_table.insert(0, "rank", range(1, len(top_words_table) + 1))
+            st.write('Most cited words')
+            st.dataframe(top_words_table, use_container_width=True, hide_index=True)
             top_words = top_words_count.index.to_list()
             word = st.selectbox('Top words', top_words)
 
